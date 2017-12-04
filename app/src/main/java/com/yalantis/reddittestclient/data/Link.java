@@ -13,15 +13,15 @@ import io.realm.annotations.PrimaryKey;
 
 public class Link extends RealmObject {
 
-    public static final String ID = "id";
-    public static final String TITLE = "title";
-    public static final String AUTHOR = "author";
-    public static final String SUBREDDIT = "subreddit";
-    public static final String CREATED_UTC = "created_utc";
-    public static final String THUMBNAIL = "thumbnail";
-    public static final String URL = "url";
-    public static final String SCORE = "score";
-    public static final String NUM_COMMENTS = "num_comments";
+    private static final String ID = "id";
+    private static final String TITLE = "title";
+    private static final String AUTHOR = "author";
+    private static final String SUBREDDIT = "subreddit";
+    private static final String CREATED_UTC = "created_utc";
+    private static final String THUMBNAIL = "thumbnail";
+    private static final String URL = "url";
+    private static final String SCORE = "score";
+    private static final String NUM_COMMENTS = "num_comments";
 
     @PrimaryKey
     @SerializedName(ID)
@@ -91,8 +91,8 @@ public class Link extends RealmObject {
         this.createdUTC = createdUTC;
     }
 
-    public int getCreatedDays() {
-        return (int) TimeUnit.MILLISECONDS.toDays(System.currentTimeMillis() - createdUTC);
+    public int getCreatedHours() {
+        return (int) TimeUnit.MILLISECONDS.toHours(System.currentTimeMillis() - createdUTC * 1000L);
     }
 
     public String getThumbnailURL() {

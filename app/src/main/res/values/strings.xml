@@ -1,3 +1,10 @@
 <resources>
     <string name="app_name">Reddit Test Client</string>
+    <string name="err_action_text">Dismiss</string>
+    <string name="link_number_comments">%d Comments</string>
+    <string name="link_author">u/%s</string>
+    <string name="link_subreddit">r/%s</string>
+    <string name="link_created">%dh</string>
+    <string name="activity_link_title">Reddit Top</string>
+    <string name="link_thumbnail_descr">Reddit thumbnail</string>
 </resources>

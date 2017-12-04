@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.v7.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/link_card"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    app:cardCornerRadius="@dimen/cardview_corner_radius"
+    app:cardElevation="@dimen/cardview_elevation"
+    app:cardPreventCornerOverlap="true"
+    app:cardUseCompatPadding="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:padding="@dimen/padding_margin_8dp">
+
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <ImageView
+                android:id="@+id/link_thumbnail"
+                android:layout_width="70dp"
+                android:layout_height="70dp"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentStart="true"
+                android:layout_alignParentTop="true"
+                android:contentDescription="@string/link_thumbnail_descr"
+                android:src="@drawable/thumbnail_blank" />
+
+            <LinearLayout
+                android:id="@+id/link_layout_header"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentTop="true"
+                android:layout_marginLeft="@dimen/padding_margin_8dp"
+                android:layout_marginStart="@dimen/padding_margin_8dp"
+                android:layout_toEndOf="@id/link_thumbnail"
+                android:layout_toRightOf="@id/link_thumbnail"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/link_author"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="@dimen/padding_margin_4dp"
+                    android:layout_marginRight="@dimen/padding_margin_4dp"
+                    android:drawableEnd="@drawable/ic_separator_dot"
+                    android:drawablePadding="@dimen/padding_margin_4dp"
+                    android:drawableRight="@drawable/ic_separator_dot"
+                    android:textSize="@dimen/link_header_textsize"
+                    tools:text="u/Blabla" />
+
+                <TextView
+                    android:id="@+id/link_subreddit"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="@dimen/padding_margin_4dp"
+                    android:layout_marginRight="@dimen/padding_margin_4dp"
+                    android:drawableEnd="@drawable/ic_separator_dot"
+                    android:drawablePadding="@dimen/padding_margin_4dp"
+                    android:drawableRight="@drawable/ic_separator_dot"
+                    android:textSize="@dimen/link_header_textsize"
+                    tools:text="r/img" />
+
+                <TextView
+                    android:id="@+id/link_created"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="@dimen/padding_margin_4dp"
+                    android:layout_marginRight="@dimen/padding_margin_4dp"
+                    android:textSize="@dimen/link_header_textsize"
+                    tools:text="3h" />
+
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/link_title"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/link_layout_header"
+                android:layout_marginLeft="@dimen/padding_margin_8dp"
+                android:layout_marginStart="@dimen/padding_margin_8dp"
+                android:layout_marginTop="@dimen/padding_margin_8dp"
+                android:layout_toEndOf="@id/link_thumbnail"
+                android:layout_toRightOf="@id/link_thumbnail"
+                android:textColor="@android:color/black"
+                tools:text="123\nasd\nasdasdad\nzxczxczc" />
+
+
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/padding_margin_8dp">
+
+            <TextView
+                android:id="@+id/link_number_of_comments"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentStart="true"
+                android:drawableLeft="@drawable/ic_comment"
+                android:drawablePadding="@dimen/padding_margin_8dp"
+                android:drawableStart="@drawable/ic_comment"
+                android:textSize="@dimen/link_header_textsize"
+                tools:text="123 Comments" />
+
+            <TextView
+                android:id="@+id/link_rating"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentEnd="true"
+                android:layout_alignParentRight="true"
+                android:drawableLeft="@drawable/ic_star"
+                android:drawablePadding="@dimen/padding_margin_8dp"
+                android:drawableStart="@drawable/ic_star"
+                android:textSize="@dimen/link_header_textsize"
+                tools:text="25011" />
+
+        </RelativeLayout>
+    </LinearLayout>
+
+
+</android.support.v7.widget.CardView>
