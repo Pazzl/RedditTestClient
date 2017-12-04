@@ -17,7 +17,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Created by Ameron on 03.12.2017.
+ * Created by ak on 03.12.2017.
  */
 
 public class LinkAdapter extends RecyclerView.Adapter<LinkAdapter.LinkViewHolder> {
@@ -39,6 +39,10 @@ public class LinkAdapter extends RecyclerView.Adapter<LinkAdapter.LinkViewHolder
         } else {
             notifyItemRangeInserted(linkList.size() - links.size(), links.size());
         }
+    }
+
+    List<Link> getLinks() {
+        return linkList;
     }
 
     @Override

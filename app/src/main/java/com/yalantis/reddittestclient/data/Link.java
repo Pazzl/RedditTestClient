@@ -1,5 +1,8 @@
 package com.yalantis.reddittestclient.data;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import com.google.gson.annotations.SerializedName;
 
 import java.util.concurrent.TimeUnit;
@@ -11,8 +14,19 @@ import io.realm.annotations.PrimaryKey;
  * Created by ak on 01.12.17.
  */
 
-public class Link extends RealmObject {
+public class Link extends RealmObject implements Parcelable {
 
+    public static final Creator<Link> CREATOR = new Creator<Link>() {
+        @Override
+        public Link createFromParcel(Parcel in) {
+            return new Link(in);
+        }
+
+        @Override
+        public Link[] newArray(int size) {
+            return new Link[size];
+        }
+    };
     private static final String ID = "id";
     private static final String TITLE = "title";
     private static final String AUTHOR = "author";
@@ -22,34 +36,40 @@ public class Link extends RealmObject {
     private static final String URL = "url";
     private static final String SCORE = "score";
     private static final String NUM_COMMENTS = "num_comments";
-
     @PrimaryKey
     @SerializedName(ID)
     private String id;
-
     @SerializedName(TITLE)
     private String title;
-
     @SerializedName(AUTHOR)
     private String author;
-
     @SerializedName(SUBREDDIT)
     private String subReddit;
-
     @SerializedName(CREATED_UTC)
     private long createdUTC;
-
     @SerializedName(THUMBNAIL)
     private String thumbnailURL;
-
     @SerializedName(URL)
     private String url;
-
     @SerializedName(SCORE)
     private int rating;
-
     @SerializedName(NUM_COMMENTS)
     private int numberOfComments;
+
+    public Link() {
+    }
+
+    protected Link(Parcel in) {
+        id = in.readString();
+        title = in.readString();
+        author = in.readString();
+        subReddit = in.readString();
+        createdUTC = in.readLong();
+        thumbnailURL = in.readString();
+        url = in.readString();
+        rating = in.readInt();
+        numberOfComments = in.readInt();
+    }
 
     public String getId() {
         return id;
@@ -125,5 +145,39 @@ public class Link extends RealmObject {
 
     public void setNumberOfComments(int numberOfComments) {
         this.numberOfComments = numberOfComments;
+    }
+
+    @Override
+    public String toString() {
+        return "Link{" +
+                "id='" + id + '\'' +
+                ", title='" + title + '\'' +
+                ", author='" + author + '\'' +
+                ", subReddit='" + subReddit + '\'' +
+                ", createdUTC=" + createdUTC +
+                ", thumbnailURL='" + thumbnailURL + '\'' +
+                ", url='" + url + '\'' +
+                ", rating=" + rating +
+                ", numberOfComments=" + numberOfComments +
+                '}';
+    }
+
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(id);
+        dest.writeString(title);
+        dest.writeString(author);
+        dest.writeString(subReddit);
+        dest.writeLong(createdUTC);
+        dest.writeString(thumbnailURL);
+        dest.writeString(url);
+        dest.writeInt(rating);
+        dest.writeInt(numberOfComments);
     }
 }

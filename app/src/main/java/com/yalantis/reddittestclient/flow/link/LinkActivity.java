@@ -15,16 +15,18 @@ import com.yalantis.reddittestclient.R;
 import com.yalantis.reddittestclient.base.BaseMVPActivity;
 import com.yalantis.reddittestclient.data.Link;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Created by Ameron on 03.12.2017.
+ * Created by ak on 03.12.2017.
  */
 
 public class LinkActivity extends BaseMVPActivity implements LinkContract.View {
 
     private static final int REDDIT_FETCH_LIMIT = 25;
     private static final int REDDIT_PAGINATION_MARGIN = 5;
+    private static final String ARG_LINKS = "arg_links";
 
     private LinkPresenter linkPresenter;
     private RecyclerView recyclerView;
@@ -48,7 +50,12 @@ public class LinkActivity extends BaseMVPActivity implements LinkContract.View {
             }
         });
 
-        linkPresenter.initLinks();
+        if (savedInstanceState != null && savedInstanceState.getParcelableArrayList(ARG_LINKS) != null) {
+            List<Link> links = savedInstanceState.getParcelableArrayList(ARG_LINKS);
+            showLinks(links, true);
+        } else {
+            linkPresenter.initLinks();
+        }
     }
 
     @Override
@@ -85,6 +92,16 @@ public class LinkActivity extends BaseMVPActivity implements LinkContract.View {
             recyclerView.setEnabled(true);
         }
     }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        LinkAdapter adapter = (LinkAdapter) recyclerView.getAdapter();
+        ArrayList<Link> links = new ArrayList<>();
+        links.addAll(adapter.getLinks());
+        outState.putParcelableArrayList(ARG_LINKS, links);
+        super.onSaveInstanceState(outState);
+    }
+
 
     private void setupRecyclerView() {
         LinkAdapter adapter = new LinkAdapter(new LinkAdapter.LinkClickListener() {

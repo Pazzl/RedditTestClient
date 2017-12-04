@@ -13,12 +13,11 @@ import com.yalantis.reddittestclient.data.source.repository.LinksRepository;
 
 import java.util.List;
 
-import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.functions.Action;
 import io.reactivex.functions.Consumer;
-import io.reactivex.schedulers.Schedulers;
 
 /**
- * Created by Ameron on 03.12.2017.
+ * Created by ak on 03.12.2017.
  */
 
 public class LinkPresenter extends BaseMvpPresenterImpl<LinkContract.View> implements LinkContract.Presenter {
@@ -27,7 +26,7 @@ public class LinkPresenter extends BaseMvpPresenterImpl<LinkContract.View> imple
 
     private LinksRepository linksRepository;
     private String after;
-    private boolean loadLocalLinks;
+    private boolean isFetchingInProgress = false;
 
     @Override
     public void attachView(LinkContract.View view) {
@@ -38,7 +37,7 @@ public class LinkPresenter extends BaseMvpPresenterImpl<LinkContract.View> imple
     @Override
     public void initLinks() {
         long curTime = System.currentTimeMillis();
-        loadLocalLinks = curTime - preferencesManager.getUpdateTime() <= CACHE_VALID;
+        boolean loadLocalLinks = curTime - preferencesManager.getUpdateTime() <= CACHE_VALID;
         if (BuildConfig.DEBUG) {
             Log.d("debug", "initLinks with local -> " + loadLocalLinks);
         }
@@ -47,69 +46,94 @@ public class LinkPresenter extends BaseMvpPresenterImpl<LinkContract.View> imple
     }
 
     @Override
+    public void detachView() {
+        linksRepository.clear();
+        super.detachView();
+    }
+
+    @Override
     public void loadLinks(final boolean loadLocalLinks) {
-        view.showProgressBar();
-        addDisposable(linksRepository.getLinks(loadLocalLinks)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Consumer<List<Link>>() {
-                    @Override
-                    public void accept(List<Link> links) throws Exception {
-                        view.hideProgressBar();
-                        view.showLinks(links, true);
-                    }
-                }, new Consumer<Throwable>() {
-                    @Override
-                    public void accept(Throwable throwable) throws Exception {
-                        view.hideProgressBar();
-                        throwable.printStackTrace();
-                        view.showErrorMessage(throwable.toString());
-                    }
-                }));
+        if (!isFetchingInProgress) {
+            isFetchingInProgress = true;
+            view.showProgressBar();
+            addDisposable(linksRepository.getLinks(loadLocalLinks)
+                    .subscribe(new Consumer<List<Link>>() {
+                        @Override
+                        public void accept(List<Link> links) throws Exception {
+                            if (BuildConfig.DEBUG) {
+                                Log.d("debug", "get links in loadLinks with size = " + links.size());
+                            }
+
+                            view.hideProgressBar();
+                            if (links.size() > 0) {
+                                view.showLinks(links, true);
+                            }
+                        }
+                    }, new Consumer<Throwable>() {
+                        @Override
+                        public void accept(Throwable throwable) throws Exception {
+                            isFetchingInProgress = false;
+                            view.hideProgressBar();
+                            throwable.printStackTrace();
+                            view.showErrorMessage(throwable.getMessage());
+                        }
+                    }, new Action() {
+                        @Override
+                        public void run() throws Exception {
+                            isFetchingInProgress = false;
+                        }
+                    }));
+        }
     }
 
     @Override
     public void loadNextLinks() {
-//        view.showProgressBar();
-        addDisposable(linksRepository.getLinks(false)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Consumer<List<Link>>() {
-                    @Override
-                    public void accept(List<Link> links) throws Exception {
-//                        view.hideProgressBar();
-                        view.showLinks(links, false);
-                    }
-                }, new Consumer<Throwable>() {
-                    @Override
-                    public void accept(Throwable throwable) throws Exception {
-//                        view.hideProgressBar();
-                        throwable.printStackTrace();
-                        view.showErrorMessage(throwable.toString());
-                    }
-                }));
+        if (!isFetchingInProgress) {
+            isFetchingInProgress = true;
+            addDisposable(linksRepository.getLinks(false)
+                    .subscribe(new Consumer<List<Link>>() {
+                        @Override
+                        public void accept(List<Link> links) throws Exception {
+                            view.showLinks(links, false);
+                        }
+                    }, new Consumer<Throwable>() {
+                        @Override
+                        public void accept(Throwable throwable) throws Exception {
+                            isFetchingInProgress = false;
+                            throwable.printStackTrace();
+                            view.showErrorMessage(throwable.getMessage());
+                        }
+                    }, new Action() {
+                        @Override
+                        public void run() throws Exception {
+                            isFetchingInProgress = false;
+                        }
+                    }));
+        }
     }
 
     @Override
     public void refreshLinks() {
-        view.showProgressBar();
-        addDisposable(linksRepository.refreshLinks()
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Consumer<List<Link>>() {
-                    @Override
-                    public void accept(List<Link> links) throws Exception {
-                        view.hideProgressBar();
-                        view.showLinks(links, true);
-                    }
-                }, new Consumer<Throwable>() {
-                    @Override
-                    public void accept(Throwable throwable) throws Exception {
-                        view.hideProgressBar();
-                        throwable.printStackTrace();
-                        view.showErrorMessage(throwable.toString());
-                    }
-                }));
+        if (!isFetchingInProgress) {
+            view.showProgressBar();
+            addDisposable(linksRepository.refreshLinks()
+                    .subscribe(new Consumer<List<Link>>() {
+                        @Override
+                        public void accept(List<Link> links) throws Exception {
+                            isFetchingInProgress = false;
+                            view.hideProgressBar();
+                            view.showLinks(links, true);
+                        }
+                    }, new Consumer<Throwable>() {
+                        @Override
+                        public void accept(Throwable throwable) throws Exception {
+                            isFetchingInProgress = false;
+                            view.hideProgressBar();
+                            throwable.printStackTrace();
+                            view.showErrorMessage(throwable.getMessage());
+                        }
+                    }));
+        }
     }
 
     @Override

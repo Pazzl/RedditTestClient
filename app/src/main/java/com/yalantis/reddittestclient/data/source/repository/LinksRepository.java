@@ -10,6 +10,7 @@ import java.util.List;
 
 import io.reactivex.Observable;
 import io.reactivex.Single;
+import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.functions.Consumer;
 
 /**
@@ -33,19 +34,17 @@ public class LinksRepository {
     public Observable<List<Link>> getLinks(boolean loadFromLocalRepository) {
         if (BuildConfig.DEBUG) {
             Log.d("debug", "localDS empty -> " + localDataSource.isEmpty());
-            Log.d("debug", "load from local -> " + localDataSource.isEmpty());
+            Log.d("debug", "load from local -> " + loadFromLocalRepository);
             Log.d("debug", "after -> " + remoteDataSource.getAfter());
         }
-
 
         if (!localDataSource.isEmpty() && loadFromLocalRepository && remoteDataSource.getAfter() == null) {
             if (BuildConfig.DEBUG) {
                 Log.d("debug", "loading from local storage");
             }
-            return localDataSource.getLinks(null).concatWith(getRemoteLinks(null)).toObservable();
+            //return localDataSource.getObservableLinks(null).concatWith(getRemoteLinks(null).toObservable());
+            return localDataSource.getSingleLinks(null).concatWith(getRemoteLinks(null)).toObservable();
         } else {
-            Log.d("debug", getClass().getName() + " after = " + remoteDataSource.getAfter());
-
             return getRemoteLinks(remoteDataSource.getAfter()).toObservable();
         }
     }
@@ -56,9 +55,7 @@ public class LinksRepository {
     }
 
     private Single<List<Link>> getRemoteLinks(final String after) {
-        Log.d("debug", getClass().getName() + " after = " + after);
-
-        return remoteDataSource.getLinks(after)
+        return remoteDataSource.getSingleLinks(after)
                 .doOnSuccess(new Consumer<List<Link>>() {
                     @Override
                     public void accept(List<Link> links) throws Exception {
@@ -67,14 +64,19 @@ public class LinksRepository {
                         }
                         saveLinks(links);
                     }
-                });
+                })
+                .observeOn(AndroidSchedulers.mainThread());
     }
 
     private void saveLinks(List<Link> links) {
         localDataSource.saveLinks(links);
     }
 
-    public void clearLinks() {
+    private void clearLinks() {
         localDataSource.clearLinks();
+    }
+
+    public void clear() {
+        localDataSource.closeCurrentRealm();
     }
 }
