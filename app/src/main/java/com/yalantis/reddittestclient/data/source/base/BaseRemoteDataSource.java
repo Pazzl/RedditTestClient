@@ -2,7 +2,8 @@ package com.yalantis.reddittestclient.data.source.base;
 
 import android.content.Context;
 
-import com.google.gson.Gson;
+import com.google.gson.ExclusionStrategy;
+import com.google.gson.FieldAttributes;
 import com.google.gson.GsonBuilder;
 import com.yalantis.reddittestclient.BuildConfig;
 import com.yalantis.reddittestclient.api.ApiSettings;
@@ -10,6 +11,7 @@ import com.yalantis.reddittestclient.api.services.RedditService;
 
 import java.util.concurrent.TimeUnit;
 
+import io.realm.RealmObject;
 import okhttp3.OkHttpClient;
 import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Retrofit;
@@ -25,9 +27,8 @@ public class BaseRemoteDataSource implements BaseDataSource {
     private static final int CONNECT_TIMEOUT = 10;
     private static final int READ_TIMEOUT = 30;
     private static final int WRITE_TIMEOUT = 30;
-
-    private Retrofit retrofit;
     protected RedditService redditService;
+    private Retrofit retrofit;
 
     @Override
     public void init(Context context) {
@@ -51,17 +52,33 @@ public class BaseRemoteDataSource implements BaseDataSource {
             okHttpClientBuilder.addInterceptor(new HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BODY));
         }
 
-        Gson gson = new GsonBuilder().disableHtmlEscaping().serializeNulls().create();
-
         retrofit = new Retrofit.Builder()
                 .baseUrl(ApiSettings.BASE_URL)
                 .client(okHttpClientBuilder.build())
-                .addConverterFactory(GsonConverterFactory.create(gson))
+                .addConverterFactory(getGsonConverterForRealm())
                 .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
                 .build();
     }
 
     private void initRedditService() {
         redditService = retrofit.create(RedditService.class);
+    }
+
+    private GsonConverterFactory getGsonConverterForRealm() {
+        GsonBuilder gsonBuilder = new GsonBuilder();
+        gsonBuilder.serializeNulls();
+        gsonBuilder.disableHtmlEscaping();
+        gsonBuilder.setExclusionStrategies(new ExclusionStrategy() {
+            @Override
+            public boolean shouldSkipField(FieldAttributes f) {
+                return f.getDeclaredClass().equals(RealmObject.class);
+            }
+
+            @Override
+            public boolean shouldSkipClass(Class<?> clazz) {
+                return false;
+            }
+        });
+        return GsonConverterFactory.create(gsonBuilder.create());
     }
 }

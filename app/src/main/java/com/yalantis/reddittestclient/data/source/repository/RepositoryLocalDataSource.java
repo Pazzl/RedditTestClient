@@ -27,76 +27,27 @@ import io.realm.Sort;
 public class RepositoryLocalDataSource extends BaseLocalDataSource implements RepositoryDataSource {
 
     @Override
-    public Single<List<Link>> getSingleLinks(@Nullable String after) {
-        if (BuildConfig.DEBUG) {
-            Log.d("debug", "get saved links ");
-        }
-
-//        return getCurrentRealm().where(Link.class)
-//                .findAllSortedAsync(LinkFields.RATING, Sort.DESCENDING)
-//                .asFlowable()
-//                .flatMap(new Function<RealmResults<Link>, Publisher<Link>>() {
-//                    @Override
-//                    public Publisher<Link> apply(RealmResults<Link> links) throws Exception {
-//                        return Flowable.fromIterable(links.size() > 0 ? links : new ArrayList<Link>());
-//                    }
-//                })
-//                .toObservable()
-//                .toList();
-
-//        return getCurrentRealm().where(Link.class)
-//                .findAllSortedAsync(LinkFields.RATING, Sort.DESCENDING)
-//                .asFlowable()
-//                .filter(new Predicate<RealmResults<Link>>() {
-//                    @Override
-//                    public boolean test(RealmResults<Link> links) throws Exception {
-//                        Log.d("debug", "links size: " + links.size());
-//                        return links.isLoaded();
-//                    }
-//                })
-//                .toObservable()
-//                .flatMap(new Function<RealmResults<Link>, ObservableSource<Link>>() {
-//                    @Override
-//                    public ObservableSource<Link> apply(RealmResults<Link> links) throws Exception {
-//                        //Get List<Link> and convert to Observable
-//                        return Observable.fromIterable(links.subList(0, links.size()));
-//                    }
-//                })
-//                .toList();
-
-//        return getCurrentRealm().where(Link.class)
-//                .findAllSortedAsync(LinkFields.RATING, Sort.DESCENDING)
-//                .get(0)
-//                .<Link>asFlowable()
-//                .toList();
-
-        return Single.just((List<Link>) getCurrentRealm().where(Link.class).findAllSorted(LinkFields.RATING, Sort.DESCENDING));
-
-    }
-
-    @Override
-    public Observable<List<Link>> getObservableLinks(@Nullable String after) {
+    public Single<List<Link>> getLinks(@Nullable String after) {
         return getCurrentRealm().where(Link.class)
-//                .findAllSortedAsync(LinkFields.RATING, Sort.DESCENDING)
-                .findAllAsync()
+                .findAllSortedAsync(LinkFields.RATING, Sort.DESCENDING)
                 .asFlowable()
+                .toObservable()
                 .filter(new Predicate<RealmResults<Link>>() {
                     @Override
                     public boolean test(RealmResults<Link> links) throws Exception {
-                        if (BuildConfig.DEBUG) {
-                            Log.d("debug", "links size: " + links.size());
-                        }
+                        Log.d("debug", "links size: " + links.size());
                         return links.isLoaded();
                     }
                 })
-                .toObservable()
-                .flatMap(new Function<RealmResults<Link>, ObservableSource<List<Link>>>() {
+                .take(1)
+                .switchMap(new Function<RealmResults<Link>, ObservableSource<Link>>() {
                     @Override
-                    public ObservableSource<List<Link>> apply(RealmResults<Link> links) throws Exception {
-                        return Observable.just(links.subList(0, links.size() > 0 ? links.size() - 1 : 0));
+                    public ObservableSource<Link> apply(RealmResults<Link> links) throws Exception {
+                        Log.d("debug", "links size: " + links.size());
+                        return Observable.fromIterable(links).take(links.size());
                     }
-                });
-
+                })
+                .toList();
     }
 
     @Override
@@ -130,6 +81,6 @@ public class RepositoryLocalDataSource extends BaseLocalDataSource implements Re
 
     @Override
     public boolean isEmpty() {
-        return getCurrentRealm().where(Link.class).count() > 0;
+        return getCurrentRealm().where(Link.class).count() == 0;
     }
 }

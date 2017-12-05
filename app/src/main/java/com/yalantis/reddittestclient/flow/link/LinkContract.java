@@ -16,6 +16,10 @@ class LinkContract {
 
         void showLinks(List<Link> links, boolean clearPrev);
 
+        void showPaginationProgress();
+
+        void hidePaginationProgress();
+
     }
 
     interface Presenter extends BaseMvpPresenter<View> {

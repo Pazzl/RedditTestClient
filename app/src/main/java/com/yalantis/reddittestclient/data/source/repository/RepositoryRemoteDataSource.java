@@ -10,7 +10,6 @@ import com.yalantis.reddittestclient.data.source.base.BaseRemoteDataSource;
 import java.util.ArrayList;
 import java.util.List;
 
-import io.reactivex.Observable;
 import io.reactivex.Single;
 import io.reactivex.SingleSource;
 import io.reactivex.functions.Function;
@@ -25,8 +24,9 @@ public class RepositoryRemoteDataSource extends BaseRemoteDataSource implements 
     private static String listingAfter;
 
     @Override
-    public Single<List<Link>> getSingleLinks(@Nullable String after) {
+    public Single<List<Link>> getLinks(@Nullable String after) {
         return redditService.getRedditTop(after)
+                .subscribeOn(Schedulers.io())
                 .flatMap(new Function<Thing<Listing>, SingleSource<List<Link>>>() {
                     @Override
                     public SingleSource<List<Link>> apply(Thing<Listing> listingThing) throws Exception {
@@ -38,13 +38,7 @@ public class RepositoryRemoteDataSource extends BaseRemoteDataSource implements 
                         }
                         return Single.just(links);
                     }
-                })
-                .subscribeOn(Schedulers.io());
-    }
-
-    @Override
-    public Observable<List<Link>> getObservableLinks(@Nullable String after) {
-        return null;
+                });
     }
 
     @Override

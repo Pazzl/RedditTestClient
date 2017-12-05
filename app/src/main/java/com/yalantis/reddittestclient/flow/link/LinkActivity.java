@@ -15,7 +15,6 @@ import com.yalantis.reddittestclient.R;
 import com.yalantis.reddittestclient.base.BaseMVPActivity;
 import com.yalantis.reddittestclient.data.Link;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -26,7 +25,8 @@ public class LinkActivity extends BaseMVPActivity implements LinkContract.View {
 
     private static final int REDDIT_FETCH_LIMIT = 25;
     private static final int REDDIT_PAGINATION_MARGIN = 5;
-    private static final String ARG_LINKS = "arg_links";
+    private static final String ARG_LOAD_LOCAL_LINKS = "arg_load_local";
+    private static final int ITEMS_TO_SCROLL = 3;
 
     private LinkPresenter linkPresenter;
     private RecyclerView recyclerView;
@@ -36,6 +36,7 @@ public class LinkActivity extends BaseMVPActivity implements LinkContract.View {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        getApplication().onCreate();
         linkPresenter = new LinkPresenter();
         linkPresenter.attachView(this);
 
@@ -50,9 +51,8 @@ public class LinkActivity extends BaseMVPActivity implements LinkContract.View {
             }
         });
 
-        if (savedInstanceState != null && savedInstanceState.getParcelableArrayList(ARG_LINKS) != null) {
-            List<Link> links = savedInstanceState.getParcelableArrayList(ARG_LINKS);
-            showLinks(links, true);
+        if (savedInstanceState != null && savedInstanceState.getBoolean(ARG_LOAD_LOCAL_LINKS)) {
+            linkPresenter.loadLinks(true);
         } else {
             linkPresenter.initLinks();
         }
@@ -62,6 +62,19 @@ public class LinkActivity extends BaseMVPActivity implements LinkContract.View {
     public void showLinks(List<Link> links, boolean clearPrev) {
         LinkAdapter adapter = (LinkAdapter) recyclerView.getAdapter();
         adapter.setLinks(links, clearPrev);
+        if (!clearPrev) {
+            recyclerView.scrollToPosition(adapter.getItemCount() - links.size() + ITEMS_TO_SCROLL - 1);
+        }
+    }
+
+    @Override
+    public void showPaginationProgress() {
+//        ((LinkAdapter)recyclerView.getAdapter()).addLoadingLink();
+    }
+
+    @Override
+    public void hidePaginationProgress() {
+//        ((LinkAdapter)recyclerView.getAdapter()).removeLoadingLink();
     }
 
     @Override
@@ -79,7 +92,7 @@ public class LinkActivity extends BaseMVPActivity implements LinkContract.View {
 
     @Override
     protected void onDestroy() {
-        linkPresenter.detachView();
+//        linkPresenter.detachView();
         super.onDestroy();
     }
 
@@ -95,13 +108,9 @@ public class LinkActivity extends BaseMVPActivity implements LinkContract.View {
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
-        LinkAdapter adapter = (LinkAdapter) recyclerView.getAdapter();
-        ArrayList<Link> links = new ArrayList<>();
-        links.addAll(adapter.getLinks());
-        outState.putParcelableArrayList(ARG_LINKS, links);
+        outState.putBoolean(ARG_LOAD_LOCAL_LINKS, true);
         super.onSaveInstanceState(outState);
     }
-
 
     private void setupRecyclerView() {
         LinkAdapter adapter = new LinkAdapter(new LinkAdapter.LinkClickListener() {
@@ -128,7 +137,7 @@ public class LinkActivity extends BaseMVPActivity implements LinkContract.View {
         };
         layoutManager.setInitialPrefetchItemCount(REDDIT_FETCH_LIMIT);
         recyclerView.setLayoutManager(layoutManager);
-        recyclerView.setHasFixedSize(true);
+        recyclerView.setHasFixedSize(false);
         recyclerView.setItemViewCacheSize(REDDIT_FETCH_LIMIT);
         recyclerView.setDrawingCacheEnabled(true);
         recyclerView.setDrawingCacheQuality(View.DRAWING_CACHE_QUALITY_HIGH);

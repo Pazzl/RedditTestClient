@@ -6,7 +6,6 @@ import com.yalantis.reddittestclient.data.Link;
 
 import java.util.List;
 
-import io.reactivex.Observable;
 import io.reactivex.Single;
 
 /**
@@ -15,9 +14,7 @@ import io.reactivex.Single;
 
 interface RepositoryDataSource {
 
-    Single<List<Link>> getSingleLinks(@Nullable String after);
-
-    Observable<List<Link>> getObservableLinks(@Nullable String after);
+    Single<List<Link>> getLinks(@Nullable String after);
 
     void saveLinks(List<Link> links);
 

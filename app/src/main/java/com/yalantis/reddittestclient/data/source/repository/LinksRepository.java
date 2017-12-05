@@ -1,9 +1,7 @@
 package com.yalantis.reddittestclient.data.source.repository;
 
 import android.content.Context;
-import android.util.Log;
 
-import com.yalantis.reddittestclient.BuildConfig;
 import com.yalantis.reddittestclient.data.Link;
 
 import java.util.List;
@@ -32,18 +30,8 @@ public class LinksRepository {
     }
 
     public Observable<List<Link>> getLinks(boolean loadFromLocalRepository) {
-        if (BuildConfig.DEBUG) {
-            Log.d("debug", "localDS empty -> " + localDataSource.isEmpty());
-            Log.d("debug", "load from local -> " + loadFromLocalRepository);
-            Log.d("debug", "after -> " + remoteDataSource.getAfter());
-        }
-
-        if (!localDataSource.isEmpty() && loadFromLocalRepository && remoteDataSource.getAfter() == null) {
-            if (BuildConfig.DEBUG) {
-                Log.d("debug", "loading from local storage");
-            }
-            //return localDataSource.getObservableLinks(null).concatWith(getRemoteLinks(null).toObservable());
-            return localDataSource.getSingleLinks(null).concatWith(getRemoteLinks(null)).toObservable();
+        if (!localDataSource.isEmpty() && loadFromLocalRepository) {
+            return localDataSource.getLinks(null).concatWith(getRemoteLinks(null)).toObservable();
         } else {
             return getRemoteLinks(remoteDataSource.getAfter()).toObservable();
         }
@@ -55,7 +43,7 @@ public class LinksRepository {
     }
 
     private Single<List<Link>> getRemoteLinks(final String after) {
-        return remoteDataSource.getSingleLinks(after)
+        return remoteDataSource.getLinks(after)
                 .doOnSuccess(new Consumer<List<Link>>() {
                     @Override
                     public void accept(List<Link> links) throws Exception {
@@ -73,7 +61,7 @@ public class LinksRepository {
     }
 
     private void clearLinks() {
-        localDataSource.clearLinks();
+//        localDataSource.clearLinks();
     }
 
     public void clear() {

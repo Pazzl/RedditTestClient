@@ -26,4 +26,5 @@ public class RedditApp extends Application {
         Realm.setDefaultConfiguration(realmConfig);
     }
 
+
 }

@@ -90,16 +90,19 @@ public class LinkPresenter extends BaseMvpPresenterImpl<LinkContract.View> imple
     public void loadNextLinks() {
         if (!isFetchingInProgress) {
             isFetchingInProgress = true;
+            view.showPaginationProgress();
             addDisposable(linksRepository.getLinks(false)
                     .subscribe(new Consumer<List<Link>>() {
                         @Override
                         public void accept(List<Link> links) throws Exception {
+                            view.hidePaginationProgress();
                             view.showLinks(links, false);
                         }
                     }, new Consumer<Throwable>() {
                         @Override
                         public void accept(Throwable throwable) throws Exception {
                             isFetchingInProgress = false;
+                            view.hidePaginationProgress();
                             throwable.printStackTrace();
                             view.showErrorMessage(throwable.getMessage());
                         }
