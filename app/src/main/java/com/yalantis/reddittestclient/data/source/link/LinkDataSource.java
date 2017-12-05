@@ -1,4 +1,4 @@
-package com.yalantis.reddittestclient.data.source.repository;
+package com.yalantis.reddittestclient.data.source.link;
 
 import android.support.annotation.Nullable;
 
@@ -12,7 +12,7 @@ import io.reactivex.Single;
  * Created by ak on 01.12.17.
  */
 
-interface RepositoryDataSource {
+interface LinkDataSource {
 
     Single<List<Link>> getLinks(@Nullable String after);
 

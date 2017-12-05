@@ -1,4 +1,4 @@
-package com.yalantis.reddittestclient.data.source.repository;
+package com.yalantis.reddittestclient.data.source.link;
 
 import android.support.annotation.Nullable;
 
@@ -19,8 +19,9 @@ import io.reactivex.schedulers.Schedulers;
  * Created by ak on 02.12.2017.
  */
 
-public class RepositoryRemoteDataSource extends BaseRemoteDataSource implements RepositoryDataSource {
+public class LinkRemoteDataSource extends BaseRemoteDataSource implements LinkDataSource {
 
+    //handle pagination
     private static String listingAfter;
 
     @Override
@@ -43,12 +44,10 @@ public class RepositoryRemoteDataSource extends BaseRemoteDataSource implements 
 
     @Override
     public void saveLinks(List<Link> links) {
-
     }
 
     @Override
     public void clearLinks() {
-
     }
 
     @Override
@@ -61,6 +60,6 @@ public class RepositoryRemoteDataSource extends BaseRemoteDataSource implements 
     }
 
     void setAfter(String listingAfter) {
-        RepositoryRemoteDataSource.listingAfter = listingAfter;
+        LinkRemoteDataSource.listingAfter = listingAfter;
     }
 }

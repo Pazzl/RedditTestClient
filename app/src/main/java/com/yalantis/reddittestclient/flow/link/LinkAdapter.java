@@ -1,15 +1,12 @@
 package com.yalantis.reddittestclient.flow.link;
 
 import android.content.Context;
-import android.os.Handler;
-import android.support.v4.widget.ContentLoadingProgressBar;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.squareup.picasso.Picasso;
@@ -23,9 +20,12 @@ import java.util.List;
  * Created by ak on 03.12.2017.
  */
 
-public class LinkAdapter extends RecyclerView.Adapter<LinkAdapter.LinkViewHolder> {
+public class LinkAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
+    private static final int VIEW_TYPE_ITEM = 1;
+    private static final int VIEW_TYPE_PROGRESS = 0;
     private final LinkClickListener clickListener;
+    private boolean isProgressEnabled = false;
     private List<Link> linkList = new ArrayList<>();
 
     LinkAdapter(LinkClickListener clickListener) {
@@ -44,44 +44,45 @@ public class LinkAdapter extends RecyclerView.Adapter<LinkAdapter.LinkViewHolder
         }
     }
 
-    void addLoadingLink() {
-        linkList.add(null);
-        Handler handler = new Handler();
-        final Runnable runnable = new Runnable() {
-            @Override
-            public void run() {
-                notifyItemInserted(linkList.size());
-            }
-        };
-
-        handler.post(runnable);
-    }
-
-    void removeLoadingLink() {
-        linkList.remove(linkList.size() - 1);
-        notifyItemRemoved(linkList.size() + 1);
-    }
-
-    List<Link> getLinks() {
-        return linkList;
+    void enableProgress(boolean isProgressEnabled) {
+        this.isProgressEnabled = isProgressEnabled;
+        notifyDataSetChanged();
     }
 
     @Override
-    public LinkViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        View linkView = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.link_card, parent, false);
-        return new LinkViewHolder(linkView, clickListener);
+    public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        RecyclerView.ViewHolder viewHolder;
+        if (viewType == VIEW_TYPE_ITEM) {
+            View linkView = LayoutInflater.from(parent.getContext())
+                    .inflate(R.layout.link_card, parent, false);
+            viewHolder = new LinkViewHolder(linkView, clickListener);
+
+        } else {
+            View progressView = LayoutInflater.from(parent.getContext())
+                    .inflate(R.layout.link_progress, parent, false);
+            viewHolder = new ProgressViewHolder(progressView);
+
+        }
+        return viewHolder;
     }
 
     @Override
-    public void onBindViewHolder(LinkViewHolder holder, int position) {
-        Link link = linkList.get(position);
-        holder.bindData(link);
+    public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
+        if (holder instanceof LinkViewHolder && position < linkList.size()) {
+            Link link = linkList.get(position);
+            ((LinkViewHolder) holder).bindData(link);
+        }
     }
 
     @Override
     public int getItemCount() {
-        return linkList.size();
+        return isProgressEnabled ? linkList.size() + 1 : linkList.size();
+    }
+
+    @Override
+    public int getItemViewType(int position) {
+
+        return isProgressEnabled && position >= linkList.size() ? VIEW_TYPE_PROGRESS : VIEW_TYPE_ITEM;
     }
 
     interface LinkClickListener {
@@ -94,7 +95,6 @@ public class LinkAdapter extends RecyclerView.Adapter<LinkAdapter.LinkViewHolder
         private Link link;
 
         private CardView linkCard;
-        private LinearLayout linkMainLayout;
         private TextView titleTV;
         private TextView authorTV;
         private TextView subredditTV;
@@ -102,13 +102,11 @@ public class LinkAdapter extends RecyclerView.Adapter<LinkAdapter.LinkViewHolder
         private ImageView thumbnailIV;
         private TextView ratingTV;
         private TextView commentsNumberTV;
-        private ContentLoadingProgressBar progressBar;
 
         LinkViewHolder(View itemView, LinkClickListener clickListener) {
             super(itemView);
             linkClickListener = clickListener;
             linkCard = itemView.findViewById(R.id.link_card);
-            linkMainLayout = itemView.findViewById(R.id.link_main_layout);
             titleTV = itemView.findViewById(R.id.link_title);
             authorTV = itemView.findViewById(R.id.link_author);
             subredditTV = itemView.findViewById(R.id.link_subreddit);
@@ -116,7 +114,6 @@ public class LinkAdapter extends RecyclerView.Adapter<LinkAdapter.LinkViewHolder
             thumbnailIV = itemView.findViewById(R.id.link_thumbnail);
             ratingTV = itemView.findViewById(R.id.link_rating);
             commentsNumberTV = itemView.findViewById(R.id.link_number_of_comments);
-            progressBar = itemView.findViewById(R.id.link_progress_bar);
 
             linkCard.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -131,25 +128,27 @@ public class LinkAdapter extends RecyclerView.Adapter<LinkAdapter.LinkViewHolder
         void bindData(Link link) {
             this.link = link;
 
-            if (link != null) {
-                Context context = linkCard.getContext();
+            Context context = linkCard.getContext();
 
-                Picasso.with(context)
-                        .load(link.getThumbnailURL())
-                        .placeholder(R.drawable.thumbnail_blank)
-                        .error(R.drawable.thumbnail_blank)
-                        .into(thumbnailIV);
+            Picasso.with(context)
+                    .load(link.getThumbnailURL())
+                    .placeholder(R.drawable.thumbnail_blank)
+                    .error(R.drawable.thumbnail_blank)
+                    .into(thumbnailIV);
 
-                authorTV.setText(context.getString(R.string.link_author, link.getAuthor()));
-                subredditTV.setText(context.getString(R.string.link_subreddit, link.getSubReddit()));
-                createdTV.setText(context.getString(R.string.link_created, link.getCreatedHours()));
-                titleTV.setText(link.getTitle());
-                commentsNumberTV.setText(context.getString(R.string.link_number_comments, link.getNumberOfComments()));
-                ratingTV.setText(String.valueOf(link.getRating()));
-            } else {
-                linkMainLayout.setVisibility(View.GONE);
-                progressBar.show();
-            }
+            authorTV.setText(context.getString(R.string.link_author, link.getAuthor()));
+            subredditTV.setText(context.getString(R.string.link_subreddit, link.getSubReddit()));
+            createdTV.setText(context.getString(R.string.link_created, link.getCreatedHours()));
+            titleTV.setText(link.getTitle());
+            commentsNumberTV.setText(context.getString(R.string.link_number_comments, link.getNumberOfComments()));
+            ratingTV.setText(String.valueOf(link.getRating()));
+        }
+    }
+
+    static class ProgressViewHolder extends RecyclerView.ViewHolder {
+
+        ProgressViewHolder(View itemView) {
+            super(itemView);
         }
     }
 }

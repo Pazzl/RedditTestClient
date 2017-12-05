@@ -1,8 +1,5 @@
 package com.yalantis.reddittestclient.data;
 
-import android.os.Parcel;
-import android.os.Parcelable;
-
 import com.google.gson.annotations.SerializedName;
 
 import java.util.concurrent.TimeUnit;
@@ -14,19 +11,8 @@ import io.realm.annotations.PrimaryKey;
  * Created by ak on 01.12.17.
  */
 
-public class Link extends RealmObject implements Parcelable {
+public class Link extends RealmObject {
 
-    public static final Creator<Link> CREATOR = new Creator<Link>() {
-        @Override
-        public Link createFromParcel(Parcel in) {
-            return new Link(in);
-        }
-
-        @Override
-        public Link[] newArray(int size) {
-            return new Link[size];
-        }
-    };
     private static final String ID = "id";
     private static final String TITLE = "title";
     private static final String AUTHOR = "author";
@@ -36,6 +22,7 @@ public class Link extends RealmObject implements Parcelable {
     private static final String URL = "url";
     private static final String SCORE = "score";
     private static final String NUM_COMMENTS = "num_comments";
+
     @PrimaryKey
     @SerializedName(ID)
     private String id;
@@ -57,18 +44,6 @@ public class Link extends RealmObject implements Parcelable {
     private int numberOfComments;
 
     public Link() {
-    }
-
-    protected Link(Parcel in) {
-        id = in.readString();
-        title = in.readString();
-        author = in.readString();
-        subReddit = in.readString();
-        createdUTC = in.readLong();
-        thumbnailURL = in.readString();
-        url = in.readString();
-        rating = in.readInt();
-        numberOfComments = in.readInt();
     }
 
     public String getId() {
@@ -162,22 +137,4 @@ public class Link extends RealmObject implements Parcelable {
                 '}';
     }
 
-
-    @Override
-    public int describeContents() {
-        return 0;
-    }
-
-    @Override
-    public void writeToParcel(Parcel dest, int flags) {
-        dest.writeString(id);
-        dest.writeString(title);
-        dest.writeString(author);
-        dest.writeString(subReddit);
-        dest.writeLong(createdUTC);
-        dest.writeString(thumbnailURL);
-        dest.writeString(url);
-        dest.writeInt(rating);
-        dest.writeInt(numberOfComments);
-    }
 }

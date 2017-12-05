@@ -1,4 +1,4 @@
-package com.yalantis.reddittestclient.data.source.repository;
+package com.yalantis.reddittestclient.data.source.link;
 
 import android.content.Context;
 
@@ -17,13 +17,13 @@ import io.reactivex.functions.Consumer;
 
 public class LinksRepository {
 
-    private RepositoryLocalDataSource localDataSource;
-    private RepositoryRemoteDataSource remoteDataSource;
+    private LinkLocalDataSource localDataSource;
+    private LinkRemoteDataSource remoteDataSource;
 
     public LinksRepository(Context context) {
 
-        localDataSource = new RepositoryLocalDataSource();
-        remoteDataSource = new RepositoryRemoteDataSource();
+        localDataSource = new LinkLocalDataSource();
+        remoteDataSource = new LinkRemoteDataSource();
 
         localDataSource.init(context);
         remoteDataSource.init(context);
@@ -44,6 +44,7 @@ public class LinksRepository {
 
     private Single<List<Link>> getRemoteLinks(final String after) {
         return remoteDataSource.getLinks(after)
+                .observeOn(AndroidSchedulers.mainThread())
                 .doOnSuccess(new Consumer<List<Link>>() {
                     @Override
                     public void accept(List<Link> links) throws Exception {
@@ -52,8 +53,7 @@ public class LinksRepository {
                         }
                         saveLinks(links);
                     }
-                })
-                .observeOn(AndroidSchedulers.mainThread());
+                });
     }
 
     private void saveLinks(List<Link> links) {
@@ -61,7 +61,7 @@ public class LinksRepository {
     }
 
     private void clearLinks() {
-//        localDataSource.clearLinks();
+        localDataSource.clearLinks();
     }
 
     public void clear() {

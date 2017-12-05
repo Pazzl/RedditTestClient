@@ -1,10 +1,8 @@
-package com.yalantis.reddittestclient.data.source.repository;
+package com.yalantis.reddittestclient.data.source.link;
 
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.util.Log;
 
-import com.yalantis.reddittestclient.BuildConfig;
 import com.yalantis.reddittestclient.data.Link;
 import com.yalantis.reddittestclient.data.LinkFields;
 import com.yalantis.reddittestclient.data.source.base.BaseLocalDataSource;
@@ -24,7 +22,7 @@ import io.realm.Sort;
  * Created by ak on 01.12.17.
  */
 
-public class RepositoryLocalDataSource extends BaseLocalDataSource implements RepositoryDataSource {
+public class LinkLocalDataSource extends BaseLocalDataSource implements LinkDataSource {
 
     @Override
     public Single<List<Link>> getLinks(@Nullable String after) {
@@ -32,18 +30,18 @@ public class RepositoryLocalDataSource extends BaseLocalDataSource implements Re
                 .findAllSortedAsync(LinkFields.RATING, Sort.DESCENDING)
                 .asFlowable()
                 .toObservable()
+                // filter only loaded results
                 .filter(new Predicate<RealmResults<Link>>() {
                     @Override
                     public boolean test(RealmResults<Link> links) throws Exception {
-                        Log.d("debug", "links size: " + links.size());
                         return links.isLoaded();
                     }
                 })
+                //we need only one portion of data
                 .take(1)
                 .switchMap(new Function<RealmResults<Link>, ObservableSource<Link>>() {
                     @Override
                     public ObservableSource<Link> apply(RealmResults<Link> links) throws Exception {
-                        Log.d("debug", "links size: " + links.size());
                         return Observable.fromIterable(links).take(links.size());
                     }
                 })
@@ -52,10 +50,7 @@ public class RepositoryLocalDataSource extends BaseLocalDataSource implements Re
 
     @Override
     public void saveLinks(final List<Link> links) {
-        if (BuildConfig.DEBUG) {
-            Log.d("debug", "save links ");
-        }
-        getCurrentRealm().executeTransaction(
+        getCurrentRealm().executeTransactionAsync(
                 new Realm.Transaction() {
                     @Override
                     public void execute(@NonNull Realm realm) {
@@ -66,9 +61,6 @@ public class RepositoryLocalDataSource extends BaseLocalDataSource implements Re
 
     @Override
     public void clearLinks() {
-        if (BuildConfig.DEBUG) {
-            Log.d("debug", "clear links ");
-        }
         getCurrentRealm().executeTransactionAsync(
                 new Realm.Transaction() {
                     @Override

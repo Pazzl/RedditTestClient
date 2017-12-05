@@ -26,7 +26,6 @@ public class LinkActivity extends BaseMVPActivity implements LinkContract.View {
     private static final int REDDIT_FETCH_LIMIT = 25;
     private static final int REDDIT_PAGINATION_MARGIN = 5;
     private static final String ARG_LOAD_LOCAL_LINKS = "arg_load_local";
-    private static final int ITEMS_TO_SCROLL = 3;
 
     private LinkPresenter linkPresenter;
     private RecyclerView recyclerView;
@@ -52,6 +51,7 @@ public class LinkActivity extends BaseMVPActivity implements LinkContract.View {
         });
 
         if (savedInstanceState != null && savedInstanceState.getBoolean(ARG_LOAD_LOCAL_LINKS)) {
+            //handle screen orientation change. load from Realm first
             linkPresenter.loadLinks(true);
         } else {
             linkPresenter.initLinks();
@@ -62,19 +62,16 @@ public class LinkActivity extends BaseMVPActivity implements LinkContract.View {
     public void showLinks(List<Link> links, boolean clearPrev) {
         LinkAdapter adapter = (LinkAdapter) recyclerView.getAdapter();
         adapter.setLinks(links, clearPrev);
-        if (!clearPrev) {
-            recyclerView.scrollToPosition(adapter.getItemCount() - links.size() + ITEMS_TO_SCROLL - 1);
-        }
     }
 
     @Override
     public void showPaginationProgress() {
-//        ((LinkAdapter)recyclerView.getAdapter()).addLoadingLink();
+        ((LinkAdapter) recyclerView.getAdapter()).enableProgress(true);
     }
 
     @Override
     public void hidePaginationProgress() {
-//        ((LinkAdapter)recyclerView.getAdapter()).removeLoadingLink();
+        ((LinkAdapter) recyclerView.getAdapter()).enableProgress(false);
     }
 
     @Override
@@ -92,7 +89,7 @@ public class LinkActivity extends BaseMVPActivity implements LinkContract.View {
 
     @Override
     protected void onDestroy() {
-//        linkPresenter.detachView();
+        linkPresenter.detachView();
         super.onDestroy();
     }
 
@@ -108,6 +105,7 @@ public class LinkActivity extends BaseMVPActivity implements LinkContract.View {
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
+        //handle screen orientation change
         outState.putBoolean(ARG_LOAD_LOCAL_LINKS, true);
         super.onSaveInstanceState(outState);
     }
@@ -137,7 +135,7 @@ public class LinkActivity extends BaseMVPActivity implements LinkContract.View {
         };
         layoutManager.setInitialPrefetchItemCount(REDDIT_FETCH_LIMIT);
         recyclerView.setLayoutManager(layoutManager);
-        recyclerView.setHasFixedSize(false);
+        recyclerView.setHasFixedSize(true);
         recyclerView.setItemViewCacheSize(REDDIT_FETCH_LIMIT);
         recyclerView.setDrawingCacheEnabled(true);
         recyclerView.setDrawingCacheQuality(View.DRAWING_CACHE_QUALITY_HIGH);

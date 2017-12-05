@@ -3,13 +3,11 @@ package com.yalantis.reddittestclient.flow.link;
 import android.net.Uri;
 import android.support.customtabs.CustomTabsIntent;
 import android.support.v4.content.ContextCompat;
-import android.util.Log;
 
-import com.yalantis.reddittestclient.BuildConfig;
 import com.yalantis.reddittestclient.R;
 import com.yalantis.reddittestclient.base.BaseMvpPresenterImpl;
 import com.yalantis.reddittestclient.data.Link;
-import com.yalantis.reddittestclient.data.source.repository.LinksRepository;
+import com.yalantis.reddittestclient.data.source.link.LinksRepository;
 
 import java.util.List;
 
@@ -22,10 +20,10 @@ import io.reactivex.functions.Consumer;
 
 public class LinkPresenter extends BaseMvpPresenterImpl<LinkContract.View> implements LinkContract.Presenter {
 
+    //time-to-live cached data
     private static final long CACHE_VALID = 10 * 60 * 1000L;
 
     private LinksRepository linksRepository;
-    private String after;
     private boolean isFetchingInProgress = false;
 
     @Override
@@ -38,10 +36,6 @@ public class LinkPresenter extends BaseMvpPresenterImpl<LinkContract.View> imple
     public void initLinks() {
         long curTime = System.currentTimeMillis();
         boolean loadLocalLinks = curTime - preferencesManager.getUpdateTime() <= CACHE_VALID;
-        if (BuildConfig.DEBUG) {
-            Log.d("debug", "initLinks with local -> " + loadLocalLinks);
-        }
-
         loadLinks(loadLocalLinks);
     }
 
@@ -60,10 +54,6 @@ public class LinkPresenter extends BaseMvpPresenterImpl<LinkContract.View> imple
                     .subscribe(new Consumer<List<Link>>() {
                         @Override
                         public void accept(List<Link> links) throws Exception {
-                            if (BuildConfig.DEBUG) {
-                                Log.d("debug", "get links in loadLinks with size = " + links.size());
-                            }
-
                             view.hideProgressBar();
                             if (links.size() > 0) {
                                 view.showLinks(links, true);
@@ -144,6 +134,7 @@ public class LinkPresenter extends BaseMvpPresenterImpl<LinkContract.View> imple
         String url = link.getUrl();
         CustomTabsIntent.Builder builder = new CustomTabsIntent.Builder();
         builder.setToolbarColor(ContextCompat.getColor(view.getContext(), R.color.colorPrimaryDark));
+        builder.setShowTitle(true);
         CustomTabsIntent customTabsIntent = builder.build();
         customTabsIntent.launchUrl(view.getContext(), Uri.parse(url));
     }
