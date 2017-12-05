@@ -75,4 +75,19 @@ public class LinkLocalDataSource extends BaseLocalDataSource implements LinkData
     public boolean isEmpty() {
         return getCurrentRealm().where(Link.class).count() == 0;
     }
+
+    @Override
+    public boolean isFetchedAllData() {
+        return true;
+    }
+
+    @Override
+    public String getAfter() {
+        return null;
+    }
+
+    @Override
+    public void setAfter(String listingAfter) {
+
+    }
 }

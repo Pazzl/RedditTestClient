@@ -46,7 +46,11 @@ public class LinkAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     void enableProgress(boolean isProgressEnabled) {
         this.isProgressEnabled = isProgressEnabled;
-        notifyDataSetChanged();
+        if (isProgressEnabled) {
+            notifyItemInserted(linkList.size());
+        } else {
+            notifyItemRemoved(linkList.size());
+        }
     }
 
     @Override

@@ -21,4 +21,10 @@ interface LinkDataSource {
     void clearLinks();
 
     boolean isEmpty();
+
+    boolean isFetchedAllData();
+
+    String getAfter();
+
+    void setAfter(String listingAfter);
 }

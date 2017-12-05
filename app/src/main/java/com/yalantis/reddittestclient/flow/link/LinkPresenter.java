@@ -78,7 +78,7 @@ public class LinkPresenter extends BaseMvpPresenterImpl<LinkContract.View> imple
 
     @Override
     public void loadNextLinks() {
-        if (!isFetchingInProgress) {
+        if (!isFetchingInProgress && !linksRepository.isFetchedMaxLinks()) {
             isFetchingInProgress = true;
             view.showPaginationProgress();
             addDisposable(linksRepository.getLinks(false)

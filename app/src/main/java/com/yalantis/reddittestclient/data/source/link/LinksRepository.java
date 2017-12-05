@@ -67,4 +67,8 @@ public class LinksRepository {
     public void clear() {
         localDataSource.closeCurrentRealm();
     }
+
+    public boolean isFetchedMaxLinks() {
+        return remoteDataSource.isFetchedAllData();
+    }
 }

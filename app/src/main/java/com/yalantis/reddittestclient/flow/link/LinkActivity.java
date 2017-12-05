@@ -12,6 +12,7 @@ import android.view.View;
 import android.view.WindowManager;
 
 import com.yalantis.reddittestclient.R;
+import com.yalantis.reddittestclient.api.ApiSettings;
 import com.yalantis.reddittestclient.base.BaseMVPActivity;
 import com.yalantis.reddittestclient.data.Link;
 
@@ -23,7 +24,7 @@ import java.util.List;
 
 public class LinkActivity extends BaseMVPActivity implements LinkContract.View {
 
-    private static final int REDDIT_FETCH_LIMIT = 25;
+    private static final int REDDIT_FETCH_LIMIT = ApiSettings.LINKS_LIMIT;
     private static final int REDDIT_PAGINATION_MARGIN = 5;
     private static final String ARG_LOAD_LOCAL_LINKS = "arg_load_local";
 
@@ -35,9 +36,12 @@ public class LinkActivity extends BaseMVPActivity implements LinkContract.View {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        getApplication().onCreate();
         linkPresenter = new LinkPresenter();
         linkPresenter.attachView(this);
+
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setTitle(getString(R.string.activity_link_title) + " " + ApiSettings.LINKS_MAX_TOP);
+        }
 
         contentLoadingProgressBar = findViewById(R.id.links_progressbar);
         recyclerView = findViewById(R.id.links_recyclerview);
@@ -66,7 +70,13 @@ public class LinkActivity extends BaseMVPActivity implements LinkContract.View {
 
     @Override
     public void showPaginationProgress() {
-        ((LinkAdapter) recyclerView.getAdapter()).enableProgress(true);
+        //use post to get rid from scroll callback
+        recyclerView.post(new Runnable() {
+            @Override
+            public void run() {
+                ((LinkAdapter) recyclerView.getAdapter()).enableProgress(true);
+            }
+        });
     }
 
     @Override
@@ -133,7 +143,6 @@ public class LinkActivity extends BaseMVPActivity implements LinkContract.View {
                 return super.getExtraLayoutSpace(state);
             }
         };
-        layoutManager.setInitialPrefetchItemCount(REDDIT_FETCH_LIMIT);
         recyclerView.setLayoutManager(layoutManager);
         recyclerView.setHasFixedSize(true);
         recyclerView.setItemViewCacheSize(REDDIT_FETCH_LIMIT);

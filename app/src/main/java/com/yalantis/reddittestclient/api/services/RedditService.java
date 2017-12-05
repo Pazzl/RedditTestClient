@@ -17,5 +17,5 @@ import retrofit2.http.Query;
 public interface RedditService {
 
     @GET(ApiSettings.PATH_TOP)
-    Single<Thing<Listing>> getRedditTop(@Nullable @Query("after") String after);
+    Single<Thing<Listing>> getRedditTop(@Nullable @Query("after") String after, @Nullable @Query("limit") int limit);
 }
